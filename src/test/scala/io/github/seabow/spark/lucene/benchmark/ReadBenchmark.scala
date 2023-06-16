@@ -34,12 +34,14 @@ object ReadBenchmark extends Bench.OfflineRegressionReport {
   performance of "Deserialize" config readOpts  in {
     measure method "orc" in {
       using(numRecords) setUp beforeReading  in {
-        num => PerformanceUtil.read(num, "orc").foreach{row=>}
+        num =>
+//          PerformanceUtil.read(num, "orc").foreach{row=>}
       }
     }
     measure method "lucene" in {
       using(numRecords) setUp beforeReading in {
-        num => PerformanceUtil.read(num, "lucene").foreach{row=>}
+        num =>
+//          PerformanceUtil.read(num, "lucene").foreach{row=>}
       }
     }
   }
@@ -106,14 +108,14 @@ object ReadBenchmark extends Bench.OfflineRegressionReport {
     measure method "orc" in {
       using(numRecords) setUp beforeReading  in {
         num => PerformanceUtil.read(num, "orc"
-        ).filter(arrContainsCondition).selectExpr("map_tags.`art` as art"
+        ).filter(mapExistsCondition).selectExpr("map_tags.`art` as art"
         ).withColumn("art",explode_outer(col("art"))).groupBy("art").count().collect()
       }
     }
     measure method "lucene" in {
       using(numRecords) setUp beforeReading in {
         num => PerformanceUtil.read(num, "lucene",Map("enforceFacetSchema"->"true")
-        ).filter(arrContainsCondition).groupBy("map_tags.`art`").count().collect()
+        ).filter(mapExistsCondition).groupBy("map_tags.`art`").count().collect()
       }
     }
   }
