@@ -1,5 +1,6 @@
-package io.github.seabow.spark.lucene.benchmark
+package io.github.seabow.spark.lucene.benchmark.utils
 
+import io.github.seabow.spark.lucene.benchmark.base.SparkSessionTestWrapper
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.DataFrame
@@ -8,13 +9,14 @@ import org.apache.spark.sql.functions.{col, rand, udf}
 import scala.util.Random
 
 object PerformanceUtil extends SparkSessionTestWrapper {
-  val  fs= FileSystem.get(new Configuration)
+  val fs = FileSystem.get(new Configuration)
   val outputFilePath = "benckmark_base_dir"
-  def generateRandom(numRecords:Int=1000000,mode:String="create"):Unit={
-    val finalOutputDir=outputFilePath+"/"+numRecords
+
+  def generateRandom(numRecords: Int = 1000000, mode: String = "create"): Unit = {
+    val finalOutputDir = outputFilePath + "/" + numRecords
     mode match {
-      case "create" if(fs.exists(new Path(finalOutputDir))) => return
-      case _=>
+      case "create" if (fs.exists(new Path(finalOutputDir))) => return
+      case _ =>
     }
     // 创建Spark会话
     // 定义数据量和保存路径
@@ -31,17 +33,19 @@ object PerformanceUtil extends SparkSessionTestWrapper {
       "fitness" -> Array("yoga", "running", "cycling", "weightlifting", "swimming", "pilates", "boxing", "zumba", "aerobics", "kickboxing"),
       "art" -> Array("painting", "sculpture", "photography", "drawing", "ceramics", "installation", "performance", "collage", "printmaking", "video")
     )
-    val tagBroadcastMap=spark.sparkContext.broadcast[Map[String,Array[String]]](tagHierarchy)
+    val tagBroadcastMap = spark.sparkContext.broadcast[Map[String, Array[String]]](tagHierarchy)
+
     // 根据一级标签和标签体系生成二级标签的Map
-    def generateMapTags( tagHierarchy: Map[String, Array[String]]): Map[String, Array[String]] = {
-      tagHierarchy.filter(kv=>Random.nextDouble()>0.5d).map(kv=>
-        (kv._1->kv._2.filter(a=>Random.nextDouble()>0.5d))
-      ).filter(kv=>kv._2.nonEmpty)
+    def generateMapTags(tagHierarchy: Map[String, Array[String]]): Map[String, Array[String]] = {
+      tagHierarchy.filter(kv => Random.nextDouble() > 0.5d).map(kv =>
+        (kv._1 -> kv._2.filter(a => Random.nextDouble() > 0.5d))
+      ).filter(kv => kv._2.nonEmpty)
     }
 
 
-    def generateMapTagsUDF=udf(()=>
+    def generateMapTagsUDF = udf(() =>
       generateMapTags(tagBroadcastMap.value))
+
     // 生成用户ID
     val df = spark.range(0, numRecords).select(col("id").cast("string").as("user_id"))
 
@@ -58,17 +62,17 @@ object PerformanceUtil extends SparkSessionTestWrapper {
     dfWithMapTags.write.mode("overwrite").orc(finalOutputDir)
   }
 
-  def getPath(numRecords:Int,format:String=""):String ={
-     s"benckmark_base_dir/$format$numRecords"
+  def getPath(numRecords: Int, format: String = ""): String = {
+    s"benckmark_base_dir/$format$numRecords"
   }
 
-  def write(numRecords:Int,format: String):Unit = {
+  def write(numRecords: Int, format: String): Unit = {
     spark.read.orc(getPath(numRecords)
-    ).write.format(format).mode("overwrite").save(getPath(numRecords,format))
+    ).write.format(format).mode("overwrite").save(getPath(numRecords, format))
   }
 
-  def read(numRecords:Int,format: String):DataFrame = {
-    spark.read.format(format).load(getPath(numRecords,format))
+  def read(numRecords: Int, format: String,options:Map[String,String]=Map.empty): DataFrame = {
+    spark.read.format(format).options(options).load(getPath(numRecords, format))
   }
 
 }

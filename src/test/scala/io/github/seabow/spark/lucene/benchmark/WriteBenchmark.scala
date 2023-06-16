@@ -1,9 +1,10 @@
 package io.github.seabow.spark.lucene.benchmark
 
+import io.github.seabow.spark.lucene.benchmark.utils.PerformanceUtil
 import org.scalameter.api._
 
 
-object PerformanceTest extends Bench.OfflineRegressionReport {
+object WriteBenchmark extends Bench.OfflineRegressionReport {
   val numRecords = Gen.range("numRecords")(200000, 1000000, 200000)
 
   private val writeOpts = Context(
