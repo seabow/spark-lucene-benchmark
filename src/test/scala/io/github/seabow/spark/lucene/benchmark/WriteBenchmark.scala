@@ -28,14 +28,14 @@ object WriteBenchmark extends Bench.OfflineRegressionReport {
   }
 
   performance of "Writing test" config writeOpts  in {
-    measure method "write orc" in {
-      using(numRecords) setUp beforeWriting  in {
-        num => PerformanceUtil.write(num, "orc") // 执行基准测试
-      }
-    }
     measure method "write lucene" in {
       using(numRecords) setUp beforeWriting in {
         num => PerformanceUtil.write(num, "lucene") // 执行基准测试
+      }
+    }
+    measure method "write orc" in {
+      using(numRecords) setUp beforeWriting  in {
+        num => PerformanceUtil.write(num, "orc") // 执行基准测试
       }
     }
   }

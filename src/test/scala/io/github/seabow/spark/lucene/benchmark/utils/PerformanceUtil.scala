@@ -1,6 +1,7 @@
 package io.github.seabow.spark.lucene.benchmark.utils
 
 import io.github.seabow.spark.lucene.benchmark.base.SparkSessionTestWrapper
+import io.github.seabow.spark.v2.lucene.LuceneOptions
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.DataFrame
@@ -74,5 +75,9 @@ object PerformanceUtil extends SparkSessionTestWrapper {
   def read(numRecords: Int, format: String,options:Map[String,String]=Map.empty): DataFrame = {
     spark.read.format(format).options(options).load(getPath(numRecords, format))
   }
+
+  def main(args: Array[String]): Unit = {
+    PerformanceUtil.read(1000000, "lucene",Map(LuceneOptions.vectorizedReadCapacity->"4096")).foreach{ num=>}
+    }
 
 }
