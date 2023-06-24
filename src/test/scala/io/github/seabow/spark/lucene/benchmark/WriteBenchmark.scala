@@ -4,7 +4,7 @@ import io.github.seabow.spark.lucene.benchmark.utils.PerformanceUtil
 import org.scalameter.api._
 
 
-object WriteBenchmark extends Bench.OfflineRegressionReport {
+object WriteBenchmark extends Bench.OnlineRegressionReport {
   val numRecords = Gen.range("numRecords")(200000, 1000000, 200000)
 
   private val writeOpts = Context(
@@ -15,7 +15,7 @@ object WriteBenchmark extends Bench.OfflineRegressionReport {
     exec.jvmflags -> List("-Xms2g", "-Xmx2g")
   )
 
-  private val beforeWriting={
+ @transient lazy private val beforeWriting={
     numRecord =>
       generateRandom(numRecord) // 在基准测试之前先生成随机文件
   }
